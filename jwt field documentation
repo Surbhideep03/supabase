@@ -1,0 +1,55 @@
+# JWT Fields Documentation
+
+ Introduction
+When working with authentication, JSON Web Tokens (JWT) play a crucial role. They help verify identities and authorize access securely. But when you're handling JWTs in your server code—especially in Rust—you need to know what fields are included, their types, and whether they're required. This guide breaks it all down in a simple, human-friendly way.
+
+Standard JWT Fields
+JWTs have some standard fields that you’ll likely encounter. Here’s what they mean:
+
+| Field Name    | Type      | Required? | What It Does |
+|--------------|----------|-----------|--------------|
+| `iss`        | String   | Yes       | Stands for "Issuer"—who created the token. |
+| `sub`        | String   | Yes       | The "Subject"—who the token is about. |
+| `aud`        | String or Array | Optional | The "Audience"—who the token is meant for. |
+| `exp`        | Integer  | Yes       | Expiration time (Unix timestamp). Once this time passes, the token is no longer valid. |
+| `nbf`        | Integer  | Optional  | "Not Before"—the token isn’t valid before this time. |
+| `iat`        | Integer  | Optional  | "Issued At"—when the token was created. |
+| `jti`        | String   | Optional  | A unique identifier for the token, useful for preventing reuse. |
+
+## Custom Fields
+Besides the standard ones, your application might include extra details inside the token. But when working with Rust, be mindful of reserved keywords like `ref` and rename them if needed.
+
+| Field Name | Type | Required? | Notes |
+|-----------|------|-----------|-------|
+| `user_id` | String or Integer | Yes | The unique identifier for the user. |
+| `role` | String | Optional | The user’s role (e.g., admin, user). |
+| `ref` | String | Optional | **Warning:** `ref` is a reserved keyword in Rust. If your JWT includes it, rename it in Rust code. |
+
+## Handling JWTs in Rust
+If you’re writing a Rust server that needs to decode JWTs, here’s how you can define a struct to hold the token’s data:
+
+rust
+#[derive(Serialize, Deserialize)]
+struct Claims {
+    iss: String,
+    sub: String,
+    aud: Option<String>,
+    exp: i64,
+    nbf: Option<i64>,
+    iat: Option<i64>,
+    jti: Option<String>,
+    user_id: String,
+    role: Option<String>,
+    #[serde(rename = "ref")] // Rename `ref` to avoid conflicts
+    reference: Option<String>,
+}
+
+
+### Key Takeaways:
+- Use `#[serde(rename = "ref")]` to rename reserved keywords like `ref` in Rust.
+- Make sure all required fields are present and correctly formatted.
+- Libraries like `jsonwebtoken` and `serde` make handling JWTs in Rust much easier.
+
+## Wrapping Up
+JWTs help secure applications by verifying identity and permissions. Knowing the required fields and handling them correctly—especially in Rust—ensures smooth authentication and better security. If you're dealing with custom fields, remember to rename any conflicting ones. Happy coding!
+
